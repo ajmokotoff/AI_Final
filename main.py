@@ -2,6 +2,9 @@ import csv
 
 import numpy
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.datasets import load_iris
 
 
 # library readMe: https://docs.python.org/2/library/csv.html
@@ -145,6 +148,16 @@ if __name__ == "__main__":
 
     # Change the value of instanceNumber to change which data to use for test
     # Keep value above 300 so as to avoid testing on training data
-    instanceNumber = 350
+    instanceNumber = 340
     print "Instance Prediction: ", rf.predict(data[instanceNumber])
     print "Actual Score: ", targets[instanceNumber]
+
+    # Train Boosted Stump Algorithm
+    # iris = load_iris()
+    clf = AdaBoostClassifier(n_estimators=100,algorithm="SAMME.R")
+    # scores = cross_val_score(clf, data[:300], targets[:300])
+    # scores = cross_val_score(clf, iris.data, iris.target)
+    clf.fit(data[:300],targets[:300])
+    # print "Boosted Stump Prediction: ", scores.mean()
+    print "Boosted Stump Prediction: " + str(clf.predict(data[instanceNumber]))
+    print "Actual Score: " + str(targets[instanceNumber])
