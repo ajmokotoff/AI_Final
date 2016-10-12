@@ -148,16 +148,33 @@ if __name__ == "__main__":
 
     # Change the value of instanceNumber to change which data to use for test
     # Keep value above 300 so as to avoid testing on training data
-    instanceNumber = 340
+    instanceNumber = 301
     print "Instance Prediction: ", rf.predict(data[instanceNumber])
     print "Actual Score: ", targets[instanceNumber]
 
     # Train Boosted Stump Algorithm
-    # iris = load_iris()
-    clf = AdaBoostClassifier(n_estimators=100,algorithm="SAMME.R")
-    # scores = cross_val_score(clf, data[:300], targets[:300])
-    # scores = cross_val_score(clf, iris.data, iris.target)
-    clf.fit(data[:300],targets[:300])
-    # print "Boosted Stump Prediction: ", scores.mean()
-    print "Boosted Stump Prediction: " + str(clf.predict(data[instanceNumber]))
-    print "Actual Score: " + str(targets[instanceNumber])
+    # for i in range(1,100):
+    maxScore = 0
+    maxEst = 0
+    for i in range(1,100):
+        clf = AdaBoostClassifier(n_estimators=i,algorithm="SAMME")
+        # scores = cross_val_score(clf, data[:300], targets[:300])
+        clf.fit(data[:300],targets[:300])
+        # print "Boosted Stump Prediction: ", scores.mean()
+        # predicted = []
+        # predicted = clf.predict(data[instanceNumber:])
+        # predList = predicted.tolist()
+        # targList = targets[instanceNumber:]
+        # error = []
+        # for i in range(0,len(data)-instanceNumber):
+        #     error.append(int(predList[i]) - int(targList[i]))
+        # print "Boosted Stump Prediction: " + str(predicted)
+        # print "Actual Score: " + str(targets[instanceNumber:])
+        # print "Error: " + str(error)
+        score = clf.score(data[instanceNumber:],targets[instanceNumber:])
+        if score > maxScore:
+            maxScore = score
+            maxEst = i
+        print "Score: " + str(score)
+    print "maxScore =  " + str(maxScore)
+    print "max estimators = " + str(maxEst)
