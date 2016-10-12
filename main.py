@@ -1,11 +1,10 @@
 import csv
 
 import numpy
+import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
-from sklearn.datasets import load_iris
-
 
 # library readMe: https://docs.python.org/2/library/csv.html
 
@@ -17,7 +16,7 @@ def read_data(file_path):
             data.append(row)
     return data
 
-def all_strings_to_num(entry):
+def all_strings_to_num(entry,delCat):
     if entry[0] == 'GP':
         entry[0] = 0
     else:
@@ -122,15 +121,33 @@ def all_strings_to_num(entry):
         entry[22] = 0
 
     del entry[-3:]
+    if delCat == 'general':
+        del entry[:3] #delete school, sex, age, and address
+    elif delCat == 'family':
+        del entry[23]  # delete famrel
+        del entry[12]  # delete guardian
+        del entry[4:9] #delete famsize, Pstatus, Medu, Fedu, Mjob, and Fjob
+    elif delCat == 'school':
+        del entry[29]  # delete absences
+        del entry[13:20] #delete studytime, failures, schoolsup, famsup, paid, activities, nursery, and higher
+        del entry[10] #delete reason
+    elif delCat == 'personal':
+        del entry[24:28] #delete freetime, goout, Dalc, Walc, and health
+        del entry[21:22] #delete internet, and romantic
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        delCat = str(sys.argv[1])
+    else:
+        delCat = ''
+
     data = read_data('data/student-mat.csv')
     del data[0]
     i = 0
     targets = []
     for Aentry in data:
         targets.append(Aentry[32])
-        all_strings_to_num(Aentry)
+        all_strings_to_num(Aentry,delCat)
         print "Entry #",
         print i
         for segment in Aentry:
@@ -143,38 +160,38 @@ if __name__ == "__main__":
             Aentry[x] = int(Aentry[x])
 
     # Train algorithm on first 300 data entries
-    rf = RandomForestRegressor()
-    rf.fit(data[:300], targets[:300])
+    # rf = RandomForestRegressor()
+    # rf.fit(data[:300], targets[:300])
 
     # Change the value of instanceNumber to change which data to use for test
     # Keep value above 300 so as to avoid testing on training data
     instanceNumber = 301
-    print "Instance Prediction: ", rf.predict(data[instanceNumber])
-    print "Actual Score: ", targets[instanceNumber]
+    # print "Instance Prediction: ", rf.predict(data[instanceNumber])
+    # print "Actual Score: ", targets[instanceNumber]
 
     # Train Boosted Stump Algorithm
+    # maxScore = 0
+    # maxEst = 0
     # for i in range(1,100):
-    maxScore = 0
-    maxEst = 0
-    for i in range(1,100):
-        clf = AdaBoostClassifier(n_estimators=i,algorithm="SAMME")
-        # scores = cross_val_score(clf, data[:300], targets[:300])
-        clf.fit(data[:300],targets[:300])
-        # print "Boosted Stump Prediction: ", scores.mean()
-        # predicted = []
-        # predicted = clf.predict(data[instanceNumber:])
-        # predList = predicted.tolist()
-        # targList = targets[instanceNumber:]
-        # error = []
-        # for i in range(0,len(data)-instanceNumber):
-        #     error.append(int(predList[i]) - int(targList[i]))
-        # print "Boosted Stump Prediction: " + str(predicted)
-        # print "Actual Score: " + str(targets[instanceNumber:])
-        # print "Error: " + str(error)
-        score = clf.score(data[instanceNumber:],targets[instanceNumber:])
-        if score > maxScore:
-            maxScore = score
-            maxEst = i
-        print "Score: " + str(score)
-    print "maxScore =  " + str(maxScore)
-    print "max estimators = " + str(maxEst)
+    clf = AdaBoostClassifier(n_estimators=24,algorithm="SAMME")
+    # scores = cross_val_score(clf, data[:300], targets[:300])
+    clf.fit(data[:300],targets[:300])
+    # print "Boosted Stump Prediction: ", scores.mean()
+    predicted = []
+    predicted = clf.predict(data[instanceNumber:])
+    predList = predicted.tolist()
+    targList = targets[instanceNumber:]
+    error = []
+    for i in range(0,len(data)-instanceNumber):
+        error.append(int(predList[i]) - int(targList[i]))
+    print "Boosted Stump Prediction: " + str(predicted)
+    print "Actual Score: " + str(targets[instanceNumber:])
+    print "Error: " + str(error)
+    print
+    score = clf.score(data[instanceNumber:],targets[instanceNumber:])
+    # if score > maxScore:
+    #     maxScore = score
+    #     maxEst = i
+    print "Score: " + str(score)
+    # print "maxScore =  " + str(maxScore)
+    # print "max estimators = " + str(maxEst)
