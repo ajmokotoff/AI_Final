@@ -6,6 +6,11 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
 
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.naive_bayes import MultinomialNB
+
+
 # library readMe: https://docs.python.org/2/library/csv.html
 
 def read_data(file_path):
@@ -135,6 +140,100 @@ def all_strings_to_num(entry,delCat):
         del entry[24:28] #delete freetime, goout, Dalc, Walc, and health
         del entry[21:22] #delete internet, and romantic
 
+def GaussNaiveBayes():
+     # Train Gaussian Naive Bayes
+    predictFrom = 301
+    gnb = GaussianNB()
+    gnb.fit(data[:300], targets[:300])
+    predicted = gnb.predict(data[predictFrom:])
+    predList = predicted.tolist()
+    targList = targets[predictFrom:]
+    error = []
+    score = gnb.score(data[predictFrom:],targets[predictFrom:])
+
+    for i in range(0,len(data)-predictFrom):
+        error.append(int(predList[i]) - int(targList[i]))
+    print "Gaussian Naive Bayes Prediction: " + str(predicted)
+    print "Actual Score: " + str(targets[predictFrom:])
+    print "Error: " + str(error)
+    print "Score: " + str(score)
+
+def MultiNaiveBayes():
+    # Train Multinomial Naive Bayes
+    predictFrom = 301
+    mnb = MultinomialNB()
+    mnb.fit(data[:300], targets[:300])
+    predicted = mnb.predict(data[predictFrom:])
+    predList = predicted.tolist()
+    targList = targets[predictFrom:]
+    error = []
+    score = mnb.score(data[predictFrom:],targets[predictFrom:])
+
+    for i in range(0,len(data)-predictFrom):
+        error.append(int(predList[i]) - int(targList[i]))
+    print "Gaussian Naive Bayes Prediction: " + str(predicted)
+    print "Actual Score: " + str(targets[predictFrom:])
+    print "Error: " + str(error)
+    print "Score: " + str(score)
+
+
+def BernNaiveBayes():
+     # Train Bernoulli Naive Bayes
+    predictFrom = 301
+    bnb = BernoulliNB()
+    bnb.fit(data[:300], targets[:300])
+    predicted = bnb.predict(data[predictFrom:])
+    predList = predicted.tolist()
+    targList = targets[predictFrom:]
+    error = []
+    score = bnb.score(data[predictFrom:],targets[predictFrom:])
+
+    for i in range(0,len(data)-predictFrom):
+        error.append(int(predList[i]) - int(targList[i]))
+    print "Gaussian Naive Bayes Prediction: " + str(predicted)
+    print "Actual Score: " + str(targets[predictFrom:])
+    print "Error: " + str(error)
+    print "Score: " + str(score)
+
+# def RandomForest():
+#     # # Train algorithm on first 300 data entries
+#     # rf = RandomForestRegressor()
+#     # rf.fit(data[:300], targets[:300])
+
+#     # # Change the value of instanceNumber to change which data to use for test
+#     # # Keep value above 300 so as to avoid testing on training data
+#     # instanceNumber = 301
+#     # print "Instance Prediction: ", rf.predict(data[instanceNumber])
+#     # print "Actual Score: ", targets[instanceNumber]
+
+# def BoostedStump():
+#      # # Train Boosted Stump Algorithm
+#     # # maxScore = 0
+#     # # maxEst = 0
+#     # # for i in range(1,100):
+#     # clf = AdaBoostClassifier(n_estimators=24,algorithm="SAMME")
+#     # # scores = cross_val_score(clf, data[:300], targets[:300])
+#     # clf.fit(data[:300],targets[:300])
+#     # # print "Boosted Stump Prediction: ", scores.mean()
+#     # predicted = []
+#     # predicted = clf.predict(data[instanceNumber:])
+#     # predList = predicted.tolist()
+#     # targList = targets[instanceNumber:]
+#     # error = []
+#     # for i in range(0,len(data)-instanceNumber):
+#     #     error.append(int(predList[i]) - int(targList[i]))
+#     # print "Boosted Stump Prediction: " + str(predicted)
+    # print "Actual Score: " + str(targets[instanceNumber:])
+    # print "Error: " + str(error)
+    # print 
+    # score = clf.score(data[instanceNumber:],targets[instanceNumber:])
+    # # if score > maxScore:
+    # #     maxScore = score
+    # #     maxEst = i
+    # print "Score: " + str(score)
+    # # print "maxScore =  " + str(maxScore)
+    # # print "max estimators = " + str(maxEst)
+    
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         delCat = str(sys.argv[1])
@@ -159,39 +258,16 @@ if __name__ == "__main__":
         for x in range(len(Aentry)):
             Aentry[x] = int(Aentry[x])
 
-    # Train algorithm on first 300 data entries
-    # rf = RandomForestRegressor()
-    # rf.fit(data[:300], targets[:300])
+    MultiNaiveBayes()
 
-    # Change the value of instanceNumber to change which data to use for test
-    # Keep value above 300 so as to avoid testing on training data
-    instanceNumber = 301
-    # print "Instance Prediction: ", rf.predict(data[instanceNumber])
-    # print "Actual Score: ", targets[instanceNumber]
+    
+ 
+   
 
-    # Train Boosted Stump Algorithm
-    # maxScore = 0
-    # maxEst = 0
-    # for i in range(1,100):
-    clf = AdaBoostClassifier(n_estimators=24,algorithm="SAMME")
-    # scores = cross_val_score(clf, data[:300], targets[:300])
-    clf.fit(data[:300],targets[:300])
-    # print "Boosted Stump Prediction: ", scores.mean()
-    predicted = []
-    predicted = clf.predict(data[instanceNumber:])
-    predList = predicted.tolist()
-    targList = targets[instanceNumber:]
-    error = []
-    for i in range(0,len(data)-instanceNumber):
-        error.append(int(predList[i]) - int(targList[i]))
-    print "Boosted Stump Prediction: " + str(predicted)
-    print "Actual Score: " + str(targets[instanceNumber:])
-    print "Error: " + str(error)
-    print
-    score = clf.score(data[instanceNumber:],targets[instanceNumber:])
-    # if score > maxScore:
-    #     maxScore = score
-    #     maxEst = i
-    print "Score: " + str(score)
-    # print "maxScore =  " + str(maxScore)
-    # print "max estimators = " + str(maxEst)
+   
+
+    
+
+
+
+
