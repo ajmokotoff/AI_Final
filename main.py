@@ -24,6 +24,10 @@ from sklearn.pipeline import make_pipeline
 
 from sklearn.ensemble import RandomForestRegressor
 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import AdaBoostClassifier
+
 from sklearn.svm import SVC, SVR
 from sklearn.datasets import load_digits
 from sklearn.feature_selection import RFE
@@ -160,7 +164,7 @@ def prepare_data(entry):
 	return entry
 
 
-def GaussNaiveBayes(option, opt, value, parser):
+def gauss_naive_bayes(option, opt, value, parser):
 	 # Train Gaussian Naive Bayes
 	predictFrom = 301
 	gnb = GaussianNB()
@@ -180,7 +184,7 @@ def GaussNaiveBayes(option, opt, value, parser):
 	print
 
 
-def MultiNaiveBayes(option, opt, value, parser):
+def multi_naive_bayes(option, opt, value, parser):
 	# Train Multinomial Naive Bayes
 	predictFrom = 301
 	mnb = MultinomialNB()
@@ -200,7 +204,7 @@ def MultiNaiveBayes(option, opt, value, parser):
 	print
 
 
-def BernNaiveBayes(option, opt, value, parser):
+def bern_naive_bayes(option, opt, value, parser):
 	 # Train Bernoulli Naive Bayes
 	predictFrom = 301
 	bnb = BernoulliNB()
@@ -311,12 +315,35 @@ def linear_regression(option, opt, value, parser):
 	print
 
 
+def boosted_stump(option, opt, value, parser):
+	clf = AdaBoostClassifier(n_estimators=24,algorithm="SAMME")
+	clf.fit(X[:300],y[:300])
+	predicted = []
+	predicted = clf.predict(X[301:])
+	predList = predicted.tolist()
+	targList = y[301:]
+	error = []
+	for i in range(0,len(X)-301):
+		error.append(int(predList[i]) - int(targList[i]))
+	score = clf.score(X[301:],y[301:])
+
+	print "\nBoosted Stump Prediction: " + str(predicted)
+	print "Actual Score: " + str(y[301:])
+	print "Error: " + str(error)
+	print "Score: " + str(score)
+	print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_), feature_names), reverse=True)
+	print
+
+
+
+
 
 def commandline_menu():
 	parser = OptionParser()
-	parser.add_option("-b", "--gnb", dest="gnb", action="callback", callback=GaussNaiveBayes, help="Gauss Naive Bayes")
-	parser.add_option("-m", "--mnb", dest="mnb", action="callback", callback=MultiNaiveBayes, help="Multi Naive Bayes")
-	parser.add_option("-n", "--bnb", dest="bnb", action="callback", callback=BernNaiveBayes, help="Bern Naive Bayes")
+	parser.add_option("-p", "--bsp", dest="bsp", action="callback", callback=boosted_stump, help="Boosted Stump")
+	parser.add_option("-b", "--gnb", dest="gnb", action="callback", callback=gauss_naive_bayes, help="Gauss Naive Bayes")
+	parser.add_option("-m", "--mnb", dest="mnb", action="callback", callback=multi_naive_bayes, help="Multi Naive Bayes")
+	parser.add_option("-n", "--bnb", dest="bnb", action="callback", callback=bern_naive_bayes, help="Bern Naive Bayes")
 	parser.add_option("-u", "--ufs", dest="ufs", action="callback", callback=univariate_feature_selection, help="Univariate Feature Selection")
 	parser.add_option("-s", "--svm", dest="svm", action="callback", callback=pipeline_anova_svm, help="Pipeline Anova SVM")
 	parser.add_option("-r", "--rfe", dest="rfe", action="callback", callback=recursive_feature_elimination, help="Recursive Feature Elimination")
