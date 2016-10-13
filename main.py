@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from optparse import OptionParser
 import sys
 import csv
+from pprint import pprint
 
 from sklearn.datasets import samples_generator
 from sklearn.feature_selection import SelectKBest, f_regression, RFE, SelectPercentile, f_classif
@@ -127,7 +128,10 @@ def prepare_data(entry):
 		entry[22] = 1
 	else:
 		entry[22] = 0
-	del entry[32]  # to remove target
+
+	del entry[32]  # remove target
+	del entry[31]  # remove g2
+	del entry[30]  # remove g1
 
 	return entry
 
@@ -159,7 +163,7 @@ def multi_naive_bayes(option, opt, value, parser):
 	mnb.fit(X[:300], y[:300])
 	predicted = mnb.predict(X[predictFrom:])
 	predList = predicted.tolist()
-	targList = targets[predictFrom:]
+	targList = y[predictFrom:]
 	error = []
 	score = mnb.score(X[predictFrom:],y[predictFrom:])
 
@@ -203,16 +207,14 @@ def pipeline_anova_svm(option, opt, value, parser):
 	#print(anova_svm.score(X, y))
 	#print(anova_svm.named_steps['anova'].score_func(X, y)[1])
 	print "\nPipeline Anova SVM: Features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), anova_svm.named_steps['anova'].score_func(X, y)[1]), feature_names), reverse=True)
-	#print(anova_svm)
-	print(anova_svm.named_steps['anova'].get_support())
+	pprint(sorted(zip(map(lambda x: round(x, 4), anova_svm.named_steps['anova'].score_func(X, y)[1]), feature_names), reverse=True))
 	print
 
 
 def univariate_feature_selection(option, opt, value, parser):
 	n_samples = len(y)
-	X = np.reshape(X, (n_samples, -1))
-	X = np.hstack((X, 2 * np.random.random((n_samples, 400))))
+	x = np.reshape(X, (n_samples, -1))
+	x = np.hstack((x, 2 * np.random.random((n_samples, 400))))
 
 	transform = feature_selection.SelectPercentile(feature_selection.f_classif)
 	clf = Pipeline([('anova', transform), ('svc', svm.SVC(C=1.0))])
@@ -224,7 +226,7 @@ def univariate_feature_selection(option, opt, value, parser):
 	for percentile in percentiles:
 		clf.set_params(anova__percentile=percentile)
 		# Compute cross-validation score using 1 CPU
-		this_scores = cross_val_score(clf, X, y, n_jobs=1)
+		this_scores = cross_val_score(clf, x, y, n_jobs=1)
 		score_means.append(this_scores.mean())
 		score_stds.append(this_scores.std())
 
@@ -240,7 +242,7 @@ def random_forest(option, opt, value, parser):
 	rf = RandomForestRegressor()
 	rf.fit(X, y)
 	print "\nRandom Forest: Features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), feature_names), reverse=True)
+	pprint(sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), feature_names), reverse=True))
 	print
 
 
@@ -249,8 +251,8 @@ def stability_selection(option, opt, value, parser):
 	rlasso.fit(X, y)
 
 	print "\nStability Selection: Features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
-				 feature_names), reverse=True)
+	pprint(sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
+				 feature_names), reverse=True))
 	print
 
 
@@ -263,7 +265,7 @@ def recursive_feature_elimination(option, opt, value, parser):
 	#rfe = RFE(lr, n_features_to_select=1)
 	rfe.fit(X, y)
 	print "\nRecurisve Feature Elimination: Features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), rfe.ranking_), feature_names))
+	pprint(sorted(zip(map(lambda x: round(x, 4), rfe.ranking_), feature_names)))
 	print
 
 
@@ -271,7 +273,7 @@ def ridge_regression(option, opt, value, parser):
 	ridge = Ridge(alpha=7)
 	ridge.fit(X, y)
 	print "\nRidge Regression: Features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), ridge.coef_), feature_names), reverse=True)
+	pprint(sorted(zip(map(lambda x: round(x, 4), ridge.coef_), feature_names), reverse=True))
 	print
 
 
@@ -279,7 +281,7 @@ def linear_regression(option, opt, value, parser):
 	lr = LinearRegression(normalize=True)
 	lr.fit(X, y)
 	print "\nLinear Regression: features sorted by rank:"
-	print sorted(zip(map(lambda x: round(x, 4), lr.coef_), feature_names), reverse=True)
+	pprint(sorted(zip(map(lambda x: round(x, 4), lr.coef_), feature_names), reverse=True))
 	print
 
 
@@ -299,10 +301,8 @@ def boosted_stump(option, opt, value, parser):
 	print "Actual Score: " + str(y[301:])
 	print "Error: " + str(error)
 	print "Score: " + str(score)
-	print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_), feature_names), reverse=True)
+	pprint(sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_), feature_names), reverse=True))
 	print
-
-
 
 
 
