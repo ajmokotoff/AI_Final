@@ -28,6 +28,10 @@ from sklearn.svm import SVC, SVR
 from sklearn.datasets import load_digits
 from sklearn.feature_selection import RFE
 
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.naive_bayes import MultinomialNB
+
 from sklearn.linear_model import (RandomizedLasso, LinearRegression, Ridge, Lasso)
 
 from sklearn.datasets import load_boston
@@ -156,6 +160,66 @@ def prepare_data(entry):
 	return entry
 
 
+def GaussNaiveBayes(option, opt, value, parser):
+	 # Train Gaussian Naive Bayes
+	predictFrom = 301
+	gnb = GaussianNB()
+	gnb.fit(X[:300], y[:300])
+	predicted = gnb.predict(X[predictFrom:])
+	predList = predicted.tolist()
+	targList = y[predictFrom:]
+	error = []
+	score = gnb.score(X[predictFrom:],y[predictFrom:])
+
+	for i in range(0,len(X)-predictFrom):
+		error.append(int(predList[i]) - int(targList[i]))
+	print "\nGaussian Naive Bayes Prediction: " + str(predicted)
+	print "Actual Score: " + str(y[predictFrom:])
+	print "Error: " + str(error)
+	print "Score: " + str(score)
+	print
+
+
+def MultiNaiveBayes(option, opt, value, parser):
+	# Train Multinomial Naive Bayes
+	predictFrom = 301
+	mnb = MultinomialNB()
+	mnb.fit(X[:300], y[:300])
+	predicted = mnb.predict(X[predictFrom:])
+	predList = predicted.tolist()
+	targList = targets[predictFrom:]
+	error = []
+	score = mnb.score(X[predictFrom:],y[predictFrom:])
+
+	for i in range(0,len(X)-predictFrom):
+		error.append(int(predList[i]) - int(targList[i]))
+	print "Multi Naive Bayes Prediction: " + str(predicted)
+	print "Actual Score: " + str(y[predictFrom:])
+	print "Error: " + str(error)
+	print "Score: " + str(score)
+	print
+
+
+def BernNaiveBayes(option, opt, value, parser):
+	 # Train Bernoulli Naive Bayes
+	predictFrom = 301
+	bnb = BernoulliNB()
+	bnb.fit(X[:300], y[:300])
+	predicted = bnb.predict(data[predictFrom:])
+	predList = predicted.tolist()
+	targList = y[predictFrom:]
+	error = []
+	score = bnb.score(X[predictFrom:],y[predictFrom:])
+
+	for i in range(0,len(X)-predictFrom):
+		error.append(int(predList[i]) - int(targList[i]))
+	print "\Bern Naive Bayes Prediction: " + str(predicted)
+	print "Actual Score: " + str(y[predictFrom:])
+	print "Error: " + str(error)
+	print "Score: " + str(score)
+	print
+
+
 def pipeline_anova_svm(option, opt, value, parser):
 	anova_filter = SelectKBest(f_regression, k=1)
 	clf = svm.SVC(kernel='linear')
@@ -170,7 +234,7 @@ def pipeline_anova_svm(option, opt, value, parser):
 	print sorted(zip(map(lambda x: round(x, 4), anova_svm.named_steps['anova'].score_func(X, y)[1]), feature_names), reverse=True)
 	#print(anova_svm)
 	print(anova_svm.named_steps['anova'].get_support())
-	print "\n"
+	print
 
 
 def univariate_feature_selection(option, opt, value, parser):
@@ -205,7 +269,7 @@ def random_forest(option, opt, value, parser):
 	rf.fit(X, y)
 	print "\nRandom Forest: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), feature_names), reverse=True)
-	print "\n"
+	print
 
 
 def stability_selection(option, opt, value, parser):
@@ -215,7 +279,7 @@ def stability_selection(option, opt, value, parser):
 	print "\nStability Selection: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
 				 feature_names), reverse=True)
-	print "\n"
+	print
 
 
 
@@ -228,7 +292,7 @@ def recursive_feature_elimination(option, opt, value, parser):
 	rfe.fit(X, y)
 	print "\nRecurisve Feature Elimination: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rfe.ranking_), feature_names))
-	print "\n"
+	print
 
 
 def ridge_regression(option, opt, value, parser):
@@ -236,7 +300,7 @@ def ridge_regression(option, opt, value, parser):
 	ridge.fit(X, y)
 	print "\nRidge Regression: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), ridge.coef_), feature_names), reverse=True)
-	print "\n"
+	print
 
 
 def linear_regression(option, opt, value, parser):
@@ -244,12 +308,15 @@ def linear_regression(option, opt, value, parser):
 	lr.fit(X, y)
 	print "\nLinear Regression: features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), lr.coef_), feature_names), reverse=True)
-	print "\n"
+	print
 
 
 
 def commandline_menu():
 	parser = OptionParser()
+	parser.add_option("-b", "--gnb", dest="gnb", action="callback", callback=GaussNaiveBayes, help="Gauss Naive Bayes")
+	parser.add_option("-m", "--mnb", dest="mnb", action="callback", callback=MultiNaiveBayes, help="Multi Naive Bayes")
+	parser.add_option("-n", "--bnb", dest="bnb", action="callback", callback=BernNaiveBayes, help="Bern Naive Bayes")
 	parser.add_option("-u", "--ufs", dest="ufs", action="callback", callback=univariate_feature_selection, help="Univariate Feature Selection")
 	parser.add_option("-s", "--svm", dest="svm", action="callback", callback=pipeline_anova_svm, help="Pipeline Anova SVM")
 	parser.add_option("-r", "--rfe", dest="rfe", action="callback", callback=recursive_feature_elimination, help="Recursive Feature Elimination")
