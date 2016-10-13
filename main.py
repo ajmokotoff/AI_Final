@@ -1,51 +1,19 @@
-# print(__doc__)
-
-#print(__doc__)
-
 import numpy as np
 import matplotlib.pyplot as plt
 from optparse import OptionParser
+import sys
+import csv
 
-from sklearn import svm
 from sklearn.datasets import samples_generator
-from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.pipeline import make_pipeline
-
+from sklearn.feature_selection import SelectKBest, f_regression, RFE, SelectPercentile, f_classif
 from sklearn import svm, datasets, feature_selection
 from sklearn.model_selection import cross_val_score
-from sklearn.pipeline import Pipeline
-
-from sklearn import datasets, svm
-from sklearn.feature_selection import SelectPercentile, f_classif
-
-from sklearn.datasets import samples_generator
-from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.pipeline import make_pipeline
-
-from sklearn.ensemble import RandomForestRegressor
-
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.ensemble import AdaBoostClassifier
-
+from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier
 from sklearn.svm import SVC, SVR
-from sklearn.datasets import load_digits
-from sklearn.feature_selection import RFE
-
-from sklearn.naive_bayes import GaussianNB
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.naive_bayes import MultinomialNB
-
+from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
 from sklearn.linear_model import (RandomizedLasso, LinearRegression, Ridge, Lasso)
-
-from sklearn.datasets import load_boston
-
-import sys
-import numpy as np
-import csv
-# library readme: https://docs.python.org/2/library/csv.html
 from sklearn.neural_network import MLPClassifier
-# library readme: http://scikit-learn.org/stable/modules/neural_networks_supervised.html
 
 def read_target(file_path):
 	with open('data/student-mat.csv', 'rb') as csvfile:
