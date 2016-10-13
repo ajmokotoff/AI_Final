@@ -26,30 +26,11 @@ def read_target(file_path):
 
 
 def prepare_data(entry):
-	if entry[0] == 'GP':
-		entry[0] = 0
-	else:
-		entry[0] = 1
-
-	if entry[1] == 'F':
-		entry[1] = 0
-	else:
-		entry[1] = 1
-
-	if entry[3] == 'U':
-		entry[3] = 0
-	else:
-		entry[3] = 1
-
-	if entry[4] == 'LE3':
-		entry[4] = 0
-	else:
-		entry[4] = 1
-
-	if entry[5] == 'T':
-		entry[5] = 0
-	else:
-		entry[5] = 1
+	entry[0] = 0 if entry[0] == 'GP' else 1
+	entry[1] = 0 if entry[1] == 'F' else 1
+	entry[3] = 0 if entry[3] == 'U' else 1
+	entry[4] = 0 if entry[4] == 'LE3' else 1
+	entry[5] = 0 if entry[5] == 'T' else 1
 
 	if entry[8] == 'teacher':
 		entry[8] = 0
@@ -89,49 +70,16 @@ def prepare_data(entry):
 	else:
 		entry[11] = 2
 
-	if entry[15] == 'yes':
-		entry[15] = 1
-	else:
-		entry[15] = 0
+	entry[15] = 1 if entry[15] == 'yes' else 0
+	entry[16] = 1 if entry[16] == 'yes' else 0
+	entry[17] = 1 if entry[17] == 'yes' else 0
+	entry[18] = 1 if entry[18] == 'yes' else 0
+	entry[19] = 1 if entry[19] == 'yes' else 0
+	entry[20] = 1 if entry[20] == 'yes' else 0
+	entry[21] = 1 if entry[21] == 'yes' else 0
+	entry[22] = 1 if entry[22] == 'yes' else 0
 
-	if entry[16] == 'yes':
-		entry[16] = 1
-	else:
-		entry[16] = 0
-
-	if entry[17] == 'yes':
-		entry[17] = 1
-	else:
-		entry[17] = 0
-
-	if entry[18] == 'yes':
-		entry[18] = 1
-	else:
-		entry[18] = 0
-
-	if entry[19] == 'yes':
-		entry[19] = 1
-	else:
-		entry[19] = 0
-
-	if entry[20] == 'yes':
-		entry[20] = 1
-	else:
-		entry[20] = 0
-
-	if entry[21] == 'yes':
-		entry[21] = 1
-	else:
-		entry[21] = 0
-
-	if entry[22] == 'yes':
-		entry[22] = 1
-	else:
-		entry[22] = 0
-
-	del entry[32]  # remove target
-	del entry[31]  # remove g2
-	del entry[30]  # remove g1
+	del entry[-2:]
 
 	return entry
 
