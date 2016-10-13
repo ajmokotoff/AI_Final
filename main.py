@@ -4,6 +4,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from optparse import OptionParser
 
 from sklearn import svm
 from sklearn.datasets import samples_generator
@@ -27,8 +28,7 @@ from sklearn.svm import SVC, SVR
 from sklearn.datasets import load_digits
 from sklearn.feature_selection import RFE
 
-from sklearn.linear_model import RandomizedLasso
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import (RandomizedLasso, LinearRegression, Ridge, Lasso)
 
 from sklearn.datasets import load_boston
 
@@ -156,10 +156,7 @@ def prepare_data(entry):
 	return entry
 
 
-def pipeline_anova_svm(data, target):
-	y = target
-	X = data
-
+def pipeline_anova_svm(option, opt, value, parser):
 	anova_filter = SelectKBest(f_regression, k=1)
 	clf = svm.SVC(kernel='linear')
 
@@ -169,14 +166,14 @@ def pipeline_anova_svm(data, target):
 	prediction = anova_svm.predict(X)
 	#print(anova_svm.score(X, y))
 	#print(anova_svm.named_steps['anova'].score_func(X, y)[1])
+	print "\nPipeline Anova SVM: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), anova_svm.named_steps['anova'].score_func(X, y)[1]), feature_names), reverse=True)
 	#print(anova_svm)
 	print(anova_svm.named_steps['anova'].get_support())
+	print "\n"
 
 
-def univariate_feature_selection(data, target):
-	y = target
-	X = data
+def univariate_feature_selection(option, opt, value, parser):
 	n_samples = len(y)
 	X = np.reshape(X, (n_samples, -1))
 	X = np.hstack((X, 2 * np.random.random((n_samples, 400))))
@@ -190,7 +187,7 @@ def univariate_feature_selection(data, target):
 
 	for percentile in percentiles:
 		clf.set_params(anova__percentile=percentile)
-    	# Compute cross-validation score using 1 CPU
+		# Compute cross-validation score using 1 CPU
 		this_scores = cross_val_score(clf, X, y, n_jobs=1)
 		score_means.append(this_scores.mean())
 		score_stds.append(this_scores.std())
@@ -203,44 +200,72 @@ def univariate_feature_selection(data, target):
 	plt.axis('tight')
 	plt.show()
 
-def random_forest(data, target, feature_names):
-	X = data
-	y = target
+def random_forest(option, opt, value, parser):
 	rf = RandomForestRegressor()
 	rf.fit(X, y)
-	print "Features sorted by their score:"
+	print "\nRandom Forest: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), feature_names), reverse=True)
+	print "\n"
 
 
-def stability_selection(data, target, feature_names):
-	X = data
-	y = target
+def stability_selection(option, opt, value, parser):
 	rlasso = RandomizedLasso()
 	rlasso.fit(X, y)
 
-	print "Features sorted by their score:"
+	print "\nStability Selection: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
-                 feature_names), reverse=True)
+				 feature_names), reverse=True)
+	print "\n"
 
 
 
-def recursive_feature_elimination(data, target, feature_names):
-	X = data
-	y = target
-
+def recursive_feature_elimination(option, opt, value, parser):
 	svc = SVC(kernel="linear", C=1)
 	rfe = RFE(estimator=svc, n_features_to_select=1, step=1)
 	#lr = LinearRegression()
 	#rank all features, i.e continue the elimination until the last one
 	#rfe = RFE(lr, n_features_to_select=1)
 	rfe.fit(X, y)
-	print "Features sorted by their rank:"
+	print "\nRecurisve Feature Elimination: Features sorted by rank:"
 	print sorted(zip(map(lambda x: round(x, 4), rfe.ranking_), feature_names))
+	print "\n"
 
+
+def ridge_regression(option, opt, value, parser):
+	ridge = Ridge(alpha=7)
+	ridge.fit(X, y)
+	print "\nRidge Regression: Features sorted by rank:"
+	print sorted(zip(map(lambda x: round(x, 4), ridge.coef_), feature_names), reverse=True)
+	print "\n"
+
+
+def linear_regression(option, opt, value, parser):
+	lr = LinearRegression(normalize=True)
+	lr.fit(X, y)
+	print "\nLinear Regression: features sorted by rank:"
+	print sorted(zip(map(lambda x: round(x, 4), lr.coef_), feature_names), reverse=True)
+	print "\n"
+
+
+
+def commandline_menu():
+	parser = OptionParser()
+	parser.add_option("-u", "--ufs", dest="ufs", action="callback", callback=univariate_feature_selection, help="Univariate Feature Selection")
+	parser.add_option("-s", "--svm", dest="svm", action="callback", callback=pipeline_anova_svm, help="Pipeline Anova SVM")
+	parser.add_option("-r", "--rfe", dest="rfe", action="callback", callback=recursive_feature_elimination, help="Recursive Feature Elimination")
+	parser.add_option("-e", "--ss", dest="ss", action="callback", callback=stability_selection, help="Stability Selection")
+	parser.add_option("-f", "--rf", dest="rf", action="callback", callback=random_forest, help="Random Forest")
+	parser.add_option("-g", "--rr", dest="rr", action="callback", callback=ridge_regression, help="Ridge Regression")
+	parser.add_option("-l", "--lr", dest="lr", action="callback", callback=linear_regression, help="Linear Regression")
+	(options, args) = parser.parse_args()
+
+	if len(args) < 0:
+		parser.error("wrong number of arguments, -h for help")
 
 
 if __name__ == "__main__":
 	unparsed_data = read_target('target/student-mat.csv')
+	global feature_names
 	feature_names = unparsed_data[0]
 	del unparsed_data[0]
 	i = 0
@@ -249,19 +274,13 @@ if __name__ == "__main__":
 	for Aentry in unparsed_data:
 		target.append(Aentry[32])
 		data.append(prepare_data(Aentry))
-		#print "Entry #",
-		#print i
-		#for segment in Aentry:
-		#	print segment,
-		#print ""
-		#print "target: ",
-		#print target[i]
 		i += 1
 		for x in range(len(Aentry)):
 			Aentry[x] = int(Aentry[x])
 	target = np.array(target).astype(np.float)
-	#univariate_feature_selection(data, target)
-	pipeline_anova_svm(data, target)
-	#recursive_feature_elimination(data, target, feature_names)
-	stability_selection(data, target, feature_names)
-	random_forest(data, target, feature_names)
+	global X
+	X = data
+	global y
+	y = target
+
+	commandline_menu()
