@@ -305,7 +305,6 @@ def boosted_stump(option, opt, value, parser):
 	print
 
 
-
 def commandline_menu():
 	parser = OptionParser()
 	parser.add_option("-p", "--bsp", dest="bsp", action="callback", callback=boosted_stump, help="Boosted Stump")
@@ -325,7 +324,9 @@ def commandline_menu():
 		parser.error("wrong number of arguments, -h for help")
 
 
+    
 if __name__ == "__main__":
+
 	unparsed_data = read_target('target/student-mat.csv')
 	global feature_names
 	feature_names = unparsed_data[0]
